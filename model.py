@@ -1,37 +1,77 @@
-from transformers import pipeline, AutoTokenizer, DataCollatorWithPadding, AutoModelForSequenceClassification
-from datasets import load_dataset
+import pandas as pd
+import torch
+from datasets import Dataset
+from transformers import (
+    AutoModelForSeq2SeqLM,
+    AutoTokenizer,
+    DataCollatorForSeq2Seq,
+    Seq2SeqTrainer,
+    Seq2SeqTrainingArguments,
+)
 
 # Load the dataset
-dataset = load_dataset("text", data_files="data/diabetes.txt")
+df = pd.read_csv('data/prepared_data.csv')
+dataset = Dataset.from_pandas(df)
 
-# Load the pipeline
-pipe = pipeline("text2text-generation")
+# Split the dataset into train and validation sets
+train_test_split = dataset.train_test_split(test_size=0.1)
+train_dataset = train_test_split['train']
+eval_dataset = train_test_split['test']
 
-checkpoint="facebook/mbart-large-50-many-to-one-mmt"
+# Load the model and tokenizer
+checkpoint = "t5-small"
+model = AutoModelForSeq2SeqLM.from_pretrained(checkpoint)
 tokenizer = AutoTokenizer.from_pretrained(checkpoint)
 
-# Tokenization
-def tokenize_function(Words):
-    return pipe.tokenizer(Words["text"], truncation=True)
+# Tokenization function
+def preprocess_function(examples):
+    inputs = examples['input_text']
+    targets = examples['response_text']
+    model_inputs = tokenizer(inputs, max_length=128, truncation=True, padding='max_length')
 
-# Tokenize the dataset
-tokenized_dataset = dataset.map(tokenize_function, batched=True)
-data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
+    with tokenizer.as_target_tokenizer():
+        labels = tokenizer(targets, max_length=128, truncation=True, padding='max_length')
 
-# Define Data Loaders
-from torch.utils.data import DataLoader
+    model_inputs["labels"] = labels["input_ids"]
+    return model_inputs
 
-train_dataloader = DataLoader(
-    tokenized_dataset["train"], shuffle=True, batch_size=8, collate_fn=data_collator
+# Tokenize datasets
+tokenized_train_dataset = train_dataset.map(preprocess_function, batched=True)
+tokenized_eval_dataset = eval_dataset.map(preprocess_function, batched=True)
+
+# Data collator
+data_collator = DataCollatorForSeq2Seq(tokenizer, model=model)
+
+# Training arguments
+training_args = Seq2SeqTrainingArguments(
+    output_dir="./output",
+    per_device_train_batch_size=8,
+    per_device_eval_batch_size=8,
+    num_train_epochs=10,
+    learning_rate=2e-5,
+    weight_decay=0.01,
+    save_total_limit=3,
+    evaluation_strategy="epoch",
+    logging_dir="./logs",
+    logging_steps=10,
+    predict_with_generate=True,
+    adafactor=True,
 )
-eval_dataloader = DataLoader(
-    tokenized_dataset["validation"], batch_size=8, collate_fn=data_collator
+
+# Trainer
+trainer = Seq2SeqTrainer(
+    model=model,
+    args=training_args,
+    train_dataset=tokenized_train_dataset,
+    eval_dataset=tokenized_eval_dataset,
+    tokenizer=tokenizer,
+    data_collator=data_collator,
 )
 
-# Inspect Batch
-for batch in train_dataloader:
-    break
-{k: v.shape for k, v in batch.items()}
+# Train the model
+trainer.train()
 
-# Instantiate the model
-model = AutoModelForSequenceClassification.from_pretrained(checkpoint, num_labels=2)
+# Save the fine-tuned model and tokenizer
+model.save_pretrained('./fine_tuned_model')
+tokenizer.save_pretrained('./fine_tuned_model')
+
