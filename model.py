@@ -36,7 +36,7 @@ def main():
     diabetes_data = load_dataset(file_path)
     
     # Access the 21st element of the dataset (0-indexed, so it's the 20th index)
-    sample_text = diabetes_data["text"][20]
+    sample_text = diabetes_data["text"]
     print(f"Sample text: {sample_text}")
 
     # Tokenize the entire dataset
