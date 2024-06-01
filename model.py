@@ -67,6 +67,7 @@ def main():
 
     # Save the fine-tuned model
     model.save_pretrained("fine_tuned_model")
+    tokenizer.save_pretrained("fine_tuned_model")
 
 if __name__ == "__main__":
     main()
