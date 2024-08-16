@@ -1,42 +1,36 @@
-import requests
+#Install libraries
 from bs4 import BeautifulSoup
+import requests as re
 
-def scrape_website():
-    """
-    Scrapes a website and saves the extracted text to a file.
+# Request to get the data
+url = input("Enter url: ")
+def get_request():
+    try:
+        access_data = re.get(url=url)
+        if access_data.status_code == 200:
+            return access_data.content
+        else:
+            print(f"Error found! Received status code {access_data.status_code}")
+            return None
+    except Exception as e:
+        print(f"An error occured: {e}")
+    
+def scrape_data(content):
+    # Parse the content
+    soup = BeautifulSoup(content, 'html.parser')
+    #print(soup.prettify())
 
-    This function sends an HTTP request to a specified URL, retrieves the data, 
-    and then uses BeautifulSoup to parse the HTML content. It extracts the text 
-    from the website and saves it to a file named 'diabetes.txt'.
-    """
+    # Scrape the data and store it
+    with open("data-1.txt", "a", encoding="utf-8") as file:
+        for text in soup.find_all(class_="content"):
+            file.write(text.get_text() + "\n")
 
-    # Define the URL
-    url = 'https://www.mayoclinic.org/diseases-conditions/diabetes/symptoms-causes/syc-20371444'
 
-    # Define HTTP request
-    data_retrieve = requests.get(url)
+if __name__ == "__main__":
 
-    # Check the status code of the request
-    if data_retrieve.status_code == 200:
-        print('Request successful')
+    content = get_request()
+    if content is None:
+        print("No data was scraped")
     else:
-        print('Request failed!')
-
-    # Scrape the website
-    soup = BeautifulSoup(data_retrieve.text, 'html.parser')
-
-    # Extract the text from the website
-    text = soup.select('p')
-
-    # Print the text
-    for word in text:
-        print(word.get_text())
-
-    # Save the text to a file
-    with open('diabetes.txt', 'w') as file:
-        for word in text:
-            file.write(word.get_text())
-            file.write('\n')
-
-# Call the function to execute the code
-scrape_website()
+        scrape_data(content)
+        print("Process was successful.")
