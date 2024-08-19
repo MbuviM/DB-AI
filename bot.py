@@ -1,88 +1,66 @@
+# Import Libraries
 import os
+import click
+from sqlalchemy import URL
 from openai import OpenAI
-from peewee import Model, MySQLDatabase, TextField, SQL
-from tidb_vector.peewee import VectorField
-from dotenv import load_dotenv
+from llama_index.core import VectorStoreIndex, StorageContext, Document
+from llama_index.vector_stores.tidbvector import TiDBVectorStore
 
-# Load environment variables from .env file
-load_dotenv()
-
-# Init OpenAI client
-client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
-embedding_model = "text-embedding-3-small"
-embedding_dimensions = 1536
-
-# Init TiDB connection
-db = MySQLDatabase(
-    'DATA',
-    user=os.getenv('TIDB_USERNAME'),
-    password=os.getenv('TIDB_PASSWORD'),
-    host=os.getenv('TIDB_HOST'),
+# Define TiDB connection URL
+tidb_connection_url = URL(
+    "mysql+pymysql",
+    username=os.environ['TIDB_USERNAME'],
+    password=os.environ['TIDB_PASSWORD'],
+    host=os.environ['TIDB_HOST'],
     port=4000,
-    ssl_verify_cert=True,
-    ssl_verify_identity=True
+    database="DATA",
+    query={"ssl_verify_cert": True, "ssl_verify_identity": True},
 )
 
-# Read the document and parse questions and answers
-with open("data.txt", "r", encoding="utf-8") as file:
-    qa_pairs = []
-    for line in file.readlines():
-        if line.startswith("Q:"):
-            question = line[3:].strip()
-        elif line.startswith("A:"):
-            answer = line[3:].strip()
-            qa_pairs.append((question, answer))
+# Initialize TiDB Vector Store
+tidbvec = TiDBVectorStore(
+    connection_string=tidb_connection_url,
+    table_name="diabetes_rag_app",
+    distance_strategy="cosine",
+    vector_dimension=1536, # The dimension is decided by the model
+    drop_existing_table=False,
+)
 
-# Define a model with a VectorField to store the embeddings
-class DocModel(Model):
-    question = TextField()
-    answer = TextField()
-    embedding = VectorField(dimensions=embedding_dimensions)
+# Create VectorStoreIndex and StorageContext for storage
+"""
+StorageContext is used to store vectors, nodes and indices while 
+VectorStoreIndex is used to accept nodes which are chunks of 
+documents and creates indexes for them.
+"""
+tidb_vec_index = VectorStoreIndex.from_vector_store(tidbvec)
+storage_context = StorageContext.from_defaults(vector_store=tidbvec)
+query_engine = tidb_vec_index.as_query_engine(streaming=True)
 
-    class Meta:
-        database = db
-        table_name = "qa_embedding_test"
+# Function to prepare data
+def prepare_data():
+    documents_path = "data.txt"
     
-    def __str__(self):
-        return f"Q: {self.question}\nA: {self.answer}"
+    try:
+        with open(documents_path, "r", encoding="utf-8") as file:
+            documents_text = file.read()
+        
+        # Convert the raw text into a list of Document objects
+        documents = [Document(text=documents_text)]
+        
+        # Add documents to the vector index
+        tidb_vec_index.from_documents(documents, storage_context=storage_context, show_progress=True)
+        click.echo("Data preparation complete.")
+        
+    except FileNotFoundError:
+        click.echo(f"Error: The file '{documents_path}' was not found.")
+    except Exception as e:
+        click.echo(f"An error occurred during data preparation: {e}")
 
-db.connect()
-db.drop_tables([DocModel])
-db.create_tables([DocModel])
+def chat():
+    prepare_data()
+    question = input("Enter your question: ")
+    response = query_engine.query(question)
+    click.echo(response)
 
-# Insert the QA pairs and their embeddings into TiDB
-questions = [pair[0] for pair in qa_pairs]
-answers = [pair[1] for pair in qa_pairs]
-embeddings = [
-    r.embedding
-    for r in client.embeddings.create(
-      input=questions, model=embedding_model
-    ).data
-]
-
-data_source = [
-    {"question": q, "answer": a, "embedding": emb}
-    for q, a, emb in zip(questions, answers, embeddings)
-]
-DocModel.insert_many(data_source).execute()
-
-# Query the most similar document to the question and return the answer
-def get_answer(question):
-    question_embedding = client.embeddings.create(input=question, model=embedding_model).data[0].embedding
-    related_doc = DocModel.select(
-        DocModel.answer, DocModel.embedding.cosine_distance(question_embedding).alias("distance")
-    ).order_by(SQL("distance")).first()
-
-    if related_doc:
-        return related_doc.answer
-    else:
-        return "Sorry, I couldn't find an answer to that question."
-
-# Example usage
-question = "Neonatal Intensive Care Unit (NICU)?"
-answer = get_answer(question)
-
-print(f"Question: {question}")
-print(f"Answer: {answer}")
-
-db.close()
+if __name__ == '__main__':
+    chat()
