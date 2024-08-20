@@ -3,8 +3,20 @@ import os
 import click
 from sqlalchemy import URL
 from openai import OpenAI
+import openai
+import scipy.io.wavfile as wavfile
+import sounddevice as sd
+import numpy as np
+from pydub import AudioSegment
+from pydub.playback import play
 from llama_index.core import VectorStoreIndex, StorageContext, Document
 from llama_index.vector_stores.tidbvector import TiDBVectorStore
+import time
+from contextlib import contextmanager
+from dotenv import load_dotenv
+
+load_dotenv()
+client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
 # Define TiDB connection URL
 tidb_connection_url = URL(
@@ -56,11 +68,56 @@ def prepare_data():
     except Exception as e:
         click.echo(f"An error occurred during data preparation: {e}")
 
-def chat():
+# Context manager for temporary files
+@contextmanager
+def temporary_file(filename):
+    try:
+        yield filename
+    finally:
+        if os.path.exists(filename):
+            os.remove(filename)
+
+# Convert Text to Speech using OpenAI TTS
+def speak_response(response_text, voice="echo", format="mp3"):
+    try:
+        response = client.audio.speech.create(
+            model="tts-1",
+            voice=voice,
+            input=response_text
+        )
+        
+        # Use a context manager for the temporary MP3 file
+        with temporary_file("response.mp3") as temp_mp3:
+            with open(temp_mp3, "wb") as audio_file:
+                audio_file.write(response.content)
+            
+            try:
+                # Convert MP3 to WAV
+                audio = AudioSegment.from_mp3(temp_mp3)
+                audio.export("response.wav", format="wav")
+                
+                # Play the WAV file using sounddevice
+                sample_rate, data = wavfile.read("response.wav")
+                sd.play(data, sample_rate)
+                sd.wait()  # Wait until the audio is finished playing
+                
+                # Remove the temporary WAV file
+                os.remove("response.wav")
+            except Exception as e:
+                print(f"Error playing audio: {e}")
+    
+    except openai.OpenAIError as e:
+        print(f"Error generating speech: {e}")
+    except Exception as e:
+        print(f"An error occurred during speech generation: {e}")
+
+def chat_with_voice():
     prepare_data()
-    question = input("Enter your question: ")
+  
+    question = input(f"Question: ")
     response = query_engine.query(question)
-    click.echo(response)
+    print(f"Response: {response}")
+    speak_response(str(response))
 
 if __name__ == '__main__':
-    chat()
+    chat_with_voice()
