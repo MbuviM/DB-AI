@@ -24,27 +24,9 @@ def main():
         layout="centered",
     )
 
-    # Use Markdown to include an image and title
-    st.markdown(
-        """
-        <style>
-        .title-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .title-container img {
-            height: 50px;
-            margin-right: 10px;
-        }
-        </style>
-        <div class="title-container">
-            <img src="bot.jpeg" alt="Bot Image">
-            <h1>Diabetes AI Chatbot :syringe:</h1>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    st.title("Diabetes AI Chatbot")
+    st.write("Ask questions related to diabetes and get clarification.")
+
     # User input area
     user_input = st.text_input("Enter your question below:", placeholder="Type your question here...")
 
