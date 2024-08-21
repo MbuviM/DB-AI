@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 from io import BytesIO
 import streamlit as st
 
-load_dotenv()
+#load_dotenv()
 client = OpenAI(api_key=st.secrets['OPENAI_API_KEY'])
 
 # Define TiDB connection URL
