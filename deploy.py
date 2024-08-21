@@ -12,9 +12,11 @@ st.set_page_config(
 def hide_github_icon():
     st.markdown(
         """
-        #GithubIcon {
-            visibility: hidden;
-    }
+        <style>
+        .css-1p9n6fn { /* Adjust the class name to target the GitHub icon */
+            display: none;
+        }
+        </style>
         """,
         unsafe_allow_html=True
     )
