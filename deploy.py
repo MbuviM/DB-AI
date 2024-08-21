@@ -30,7 +30,7 @@ def main():
 
             # Play the audio in Streamlit automatically
             if audio_buffer:
-                st.audio(audio_buffer.getvalue(), format='audio/mp3', unsafe_allow_html=True, start_time=0, volume=1.0)
+                st.audio(audio_buffer.getvalue(), format='audio/mp3', start_time=0, volume=1.0)
 
         else:
             st.warning("Please enter a question.")
