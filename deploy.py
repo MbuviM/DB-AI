@@ -1,19 +1,6 @@
 import streamlit as st
 from bot import prepare_data, query_engine, speak_response
-import base64
 import io
-
-
-def get_audio_html(audio_buffer):
-    """Generate HTML for playing audio automatically without controls."""
-    audio_base64 = base64.b64encode(audio_buffer.read()).decode("utf-8")
-    audio_html = f"""
-    <audio autoplay>
-        <source src="data:audio/mp3;base64,{audio_base64}" type="audio/mp3">
-        Your browser does not support the audio element.
-    </audio>
-    """
-    return audio_html
 
 def main():
     # Prepare data before starting the chat
@@ -41,10 +28,9 @@ def main():
             # Generate audio response
             audio_buffer = speak_response(str(response))
 
-            # Play the audio in Streamlit automatically
+            # Play the audio in Streamlit
             if audio_buffer:
-                audio_html = get_audio_html(audio_buffer)
-                st.components.v1.html(audio_html, height=0)  # Set height to 0 to hide the player
+                st.audio(audio_buffer.getvalue(), format='audio/mp3', start_time=0)
 
         else:
             st.warning("Please enter a question.")
