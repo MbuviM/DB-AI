@@ -4,10 +4,10 @@ import base64
 import io
 
 def get_audio_html(audio_buffer):
-    """Generate HTML for playing audio with autoplay"""
+    """Generate HTML for playing audio with controls instead of autoplay."""
     audio_base64 = base64.b64encode(audio_buffer.read()).decode("utf-8")
     audio_html = f"""
-    <audio autoplay>
+    <audio controls>
         <source src="data:audio/mp3;base64,{audio_base64}" type="audio/mp3">
         Your browser does not support the audio element.
     </audio>
