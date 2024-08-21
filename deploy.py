@@ -20,11 +20,11 @@ def main():
 
     st.set_page_config(
         page_title="Diabetes AI Chatbot",
-        page_icon=":ai:",
+        page_icon="bot.jpeg",
         layout="centered",
     )
 
-    st.title("Diabetes AI Chatbot :ai:")
+    st.title("Diabetes AI Chatbot")
     st.write("Ask questions related to diabetes and get clarification.")
 
     # User input area
