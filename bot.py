@@ -13,6 +13,7 @@ from llama_index.vector_stores.tidbvector import TiDBVectorStore
 import time
 from contextlib import contextmanager
 from dotenv import load_dotenv
+from io import BytesIO
 
 load_dotenv()
 client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
@@ -77,7 +78,6 @@ def temporary_file(filename):
             os.remove(filename)
 
 def speak_response(response_text, voice="echo", format="mp3"):
-    audio_path = "response.wav"  # Path to save the final audio file
     try:
         response = client.audio.speech.create(
             model="tts-1",
@@ -85,21 +85,15 @@ def speak_response(response_text, voice="echo", format="mp3"):
             input=response_text
         )
         
-        # Use a context manager for the temporary MP3 file
-        with temporary_file("response.mp3") as temp_mp3:
-            with open(temp_mp3, "wb") as audio_file:
-                audio_file.write(response.content)
+        # Use BytesIO to handle the MP3 data in memory
+        with BytesIO(response.content) as temp_mp3:
+            # Convert MP3 to WAV using pydub and BytesIO
+            audio = AudioSegment.from_mp3(temp_mp3)
+            wav_buffer = BytesIO()
+            audio.export(wav_buffer, format="wav")
+            wav_buffer.seek(0)  # Rewind the buffer to the beginning
             
-            try:
-                # Convert MP3 to WAV
-                audio = AudioSegment.from_mp3(temp_mp3)
-                audio.export(audio_path, format="wav")
-                
-                return audio_path  # Return the path to the audio file
-                
-            except Exception as e:
-                print(f"Error converting audio: {e}")
-                return None
+            return wav_buffer  # Return the in-memory WAV buffer
     
     except openai.OpenAIError as e:
         print(f"Error generating speech: {e}")
@@ -107,6 +101,7 @@ def speak_response(response_text, voice="echo", format="mp3"):
     except Exception as e:
         print(f"An error occurred during speech generation: {e}")
         return None
+    
 
 def chat_with_voice():
     prepare_data()
