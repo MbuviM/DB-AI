@@ -1,6 +1,6 @@
 import streamlit as st
 from bot import prepare_data, query_engine, speak_response
-import io
+import base64
 
 def main():
     # Prepare data before starting the chat
@@ -28,16 +28,15 @@ def main():
             # Generate audio response
             audio_buffer = speak_response(str(response))
 
-            # Play the audio in Streamlit automatically with HTML injection
             if audio_buffer:
                 try:
-                    audio_data = audio_buffer.getvalue()
-                    st.audio(audio_data, format='audio/mp3', start_time=0)
+                    # Convert audio to base64
+                    audio_base64 = base64.b64encode(audio_buffer.getvalue()).decode('utf-8')
 
-                    # Auto-play using HTML injection
+                    # HTML for autoplay
                     audio_html = f"""
                         <audio autoplay>
-                            <source src="data:audio/mp3;base64,{audio_buffer.getvalue().decode('utf-8')}" type="audio/mp3">
+                            <source src="data:audio/mp3;base64,{audio_base64}" type="audio/mp3">
                         </audio>
                     """
                     st.markdown(audio_html, unsafe_allow_html=True)
@@ -51,3 +50,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
