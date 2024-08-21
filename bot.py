@@ -15,6 +15,8 @@ from contextlib import contextmanager
 from dotenv import load_dotenv
 from io import BytesIO
 import streamlit as st
+import io
+from gtts import gTTS
 
 #load_dotenv()
 client = OpenAI(api_key=st.secrets['OPENAI_API_KEY'])
@@ -78,26 +80,18 @@ def temporary_file(filename):
         if os.path.exists(filename):
             os.remove(filename)
 
-def speak_response(response_text, voice="echo", format="mp3"):
+def speak_response(response_text, lang='en'):
     try:
-        response = client.audio.speech.create(
-            model="tts-1",
-            voice=voice,
-            input=response_text
-        )
+        # Generate the speech response
+        tts = gTTS(text=response_text, lang=lang)
         
-        with BytesIO(response.content) as temp_mp3:
-            audio = AudioSegment.from_mp3(temp_mp3)
-            wav_buffer = BytesIO()
-            audio.export(wav_buffer, format="wav")
-            wav_buffer.seek(0)
-            
-            print("Audio generated successfully.")
-            return wav_buffer
+        # Save to a BytesIO object
+        audio_buffer = io.BytesIO()
+        tts.write_to_fp(audio_buffer)
+        audio_buffer.seek(0)  # Rewind the buffer to the beginning
+        
+        return audio_buffer
     
-    except openai.OpenAIError as e:
-        print(f"Error generating speech: {e}")
-        return None
     except Exception as e:
         print(f"An error occurred during speech generation: {e}")
         return None
