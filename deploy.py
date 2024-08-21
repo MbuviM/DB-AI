@@ -3,6 +3,12 @@ from bot import prepare_data, query_engine, speak_response
 import base64
 import io
 
+st.set_page_config(
+        page_title="Diabetes AI Chatbot",
+        page_icon="bot.jpeg",
+        layout="centered",
+    )
+
 def hide_github_icon():
     st.markdown(
         """
@@ -32,12 +38,6 @@ def main():
     hide_github_icon()
     # Prepare data before starting the chat
     prepare_data()
-
-    st.set_page_config(
-        page_title="Diabetes AI Chatbot",
-        page_icon="bot.jpeg",
-        layout="centered",
-    )
 
     st.title("Diabetes AI Chatbot")
     st.write("Ask questions related to diabetes and get clarification.")
