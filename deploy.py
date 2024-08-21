@@ -22,7 +22,7 @@ def main():
         page_title="Diabetes AI Chatbot",
         page_icon="bot.jpeg",
         layout="centered",
-        )
+    )
     st.title("Diabetes AI Chatbot")
     st.write("Ask questions related to diabetes and get clarification.")
 
@@ -41,10 +41,10 @@ def main():
             # Generate audio response
             audio_buffer = speak_response(str(response))
 
-            # Play the audio in Streamlit automatically
+            # Play the audio in Streamlit
             if audio_buffer:
                 audio_html = get_audio_html(audio_buffer)
-                st.components.v1.html(audio_html, height=0)  # Set height to 0 to hide the player
+                st.components.v1.html(audio_html, height=200)  # Set height to control the player size
 
         else:
             st.warning("Please enter a question.")
