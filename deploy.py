@@ -7,7 +7,7 @@ def get_audio_html(audio_buffer):
     """Generate HTML for playing audio with autoplay"""
     audio_base64 = base64.b64encode(audio_buffer.read()).decode("utf-8")
     audio_html = f"""
-    <audio autoplay>
+    <audio controls autoplay>
         <source src="data:audio/wav;base64,{audio_base64}" type="audio/wav">
         Your browser does not support the audio element.
     </audio>
