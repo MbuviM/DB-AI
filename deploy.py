@@ -3,6 +3,7 @@ from bot import prepare_data, query_engine, speak_response
 import base64
 import io
 
+
 def get_audio_html(audio_buffer):
     """Generate HTML for playing audio with controls instead of autoplay."""
     audio_base64 = base64.b64encode(audio_buffer.read()).decode("utf-8")
