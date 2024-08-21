@@ -28,12 +28,23 @@ def main():
             # Generate audio response
             audio_buffer = speak_response(str(response))
 
-            # Play the audio in Streamlit automatically
+            # Play the audio in Streamlit automatically with HTML injection
             if audio_buffer:
                 try:
-                    st.audio(audio_buffer.getvalue(), format='audio/mp3', unsafe_allow_html=True, start_time=0)
-                except TypeError:
+                    audio_data = audio_buffer.getvalue()
+                    st.audio(audio_data, format='audio/mp3', start_time=0)
+
+                    # Auto-play using HTML injection
+                    audio_html = f"""
+                        <audio autoplay>
+                            <source src="data:audio/mp3;base64,{audio_buffer.getvalue().decode('utf-8')}" type="audio/mp3">
+                        </audio>
+                    """
+                    st.markdown(audio_html, unsafe_allow_html=True)
+
+                except Exception as e:
                     st.write("Sorry, there was an issue playing the audio.")
+                    st.error(f"Error: {e}")
 
         else:
             st.warning("Please enter a question.")
