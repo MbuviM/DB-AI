@@ -5,7 +5,6 @@ from sqlalchemy import URL
 from openai import OpenAI
 import openai
 import scipy.io.wavfile as wavfile
-import sounddevice as sd
 import numpy as np
 from pydub import AudioSegment
 from pydub.playback import play
@@ -14,6 +13,7 @@ from llama_index.vector_stores.tidbvector import TiDBVectorStore
 import time
 from contextlib import contextmanager
 from dotenv import load_dotenv
+import simpleaudio as sa
 
 load_dotenv()
 client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
@@ -96,11 +96,10 @@ def speak_response(response_text, voice="echo", format="mp3"):
                 audio = AudioSegment.from_mp3(temp_mp3)
                 audio.export("response.wav", format="wav")
                 
-                # Play the WAV file using sounddevice
-                sample_rate, data = wavfile.read("response.wav")
-                sd.play(data, sample_rate)
-                sd.wait()  # Wait until the audio is finished playing
-                
+                # Play the WAV file using simpleaudio
+                wave_obj = sa.WaveObject.from_wave_file("response.wav")
+                play_obj = wave_obj.play()
+                play_obj.wait_done()
                 # Remove the temporary WAV file
                 os.remove("response.wav")
             except Exception as e:
