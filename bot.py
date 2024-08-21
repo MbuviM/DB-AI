@@ -5,6 +5,7 @@ from sqlalchemy import URL
 from openai import OpenAI
 import openai
 import scipy.io.wavfile as wavfile
+import sounddevice as sd
 import numpy as np
 from pydub import AudioSegment
 from pydub.playback import play
@@ -96,8 +97,8 @@ def speak_response(response_text, voice="echo", format="mp3"):
                 audio = AudioSegment.from_mp3(temp_mp3)
                 audio.export("response.wav", format="wav")
                 
-                # Play the WAV file using simpleaudio
-                wave_obj = sa.WaveObject.from_wave_file("response.wav")
+                # Play the WAV file using sounddevice
+                wave_obj = sd.WaveObject.from_wave_file("response.wav")
                 play_obj = wave_obj.play()
                 play_obj.wait_done()
                 # Remove the temporary WAV file
