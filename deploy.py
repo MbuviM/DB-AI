@@ -28,7 +28,7 @@ def main():
             st.markdown(response)
 
             # Generate audio response
-            audio_buffer = speak_response_gtts(str(response))
+            audio_buffer = speak_response(str(response))
 
             # Play the audio in Streamlit automatically
             if audio_buffer:
