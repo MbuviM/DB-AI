@@ -28,7 +28,12 @@ def main():
             st.markdown(response)
 
             # Generate audio response
-            speak_response(str(response))
+            audio_path = speak_response(str(response))
+
+            # Play the audio in Streamlit
+            if os.path.exists(audio_path):
+                with open(audio_path, "rb") as audio_file:
+                    st.audio(audio_file.read(), format="audio/wav")  # Specify the correct format based on your audio
 
         else:
             st.warning("Please enter a question.")
