@@ -32,20 +32,15 @@ def main():
 
     if st.button("Submit"):
         if user_input:
-            # Generate a response using the query engine from bot.py
             with st.spinner("Thinking..."):
                 response = query_engine.query(user_input)
             
-            # Display the response
             st.markdown(response)
 
-            # Generate audio response
             wav_buffer = speak_response(str(response))
-
-            # Play the audio in Streamlit automatically
+            
             if wav_buffer:
-                audio_html = get_audio_html(wav_buffer)
-                st.components.v1.html(audio_html, height=0)  # Set height to 0 to hide the player
+                st.audio(wav_buffer, format="audio/wav")
 
         else:
             st.warning("Please enter a question.")
