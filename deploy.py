@@ -1,6 +1,5 @@
 import streamlit as st
 from bot import prepare_data, query_engine, speak_response
-import os
 
 def main():
     # Prepare data before starting the chat
@@ -28,15 +27,15 @@ def main():
             st.markdown(response)
 
             # Generate audio response
-            audio_path = speak_response(str(response))
+            wav_buffer = speak_response(str(response))
 
             # Play the audio in Streamlit
-            if audio_path and os.path.exists(audio_path):
-                with open(audio_path, "rb") as audio_file:
-                    st.audio(audio_file.read(), format="audio/wav")  # Specify the correct format based on your audio
+            if wav_buffer:
+                st.audio(wav_buffer, format="audio/wav")  # Play the in-memory audio buffer
 
         else:
             st.warning("Please enter a question.")
 
 if __name__ == "__main__":
     main()
+
