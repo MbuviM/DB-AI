@@ -5,10 +5,10 @@ import io
 
 
 def get_audio_html(audio_buffer):
-    """Generate HTML for playing audio with controls instead of autoplay."""
+    """Generate HTML for playing audio automatically without controls."""
     audio_base64 = base64.b64encode(audio_buffer.read()).decode("utf-8")
     audio_html = f"""
-    <audio controls>
+    <audio autoplay>
         <source src="data:audio/mp3;base64,{audio_base64}" type="audio/mp3">
         Your browser does not support the audio element.
     </audio>
@@ -41,10 +41,10 @@ def main():
             # Generate audio response
             audio_buffer = speak_response(str(response))
 
-            # Play the audio in Streamlit
+            # Play the audio in Streamlit automatically
             if audio_buffer:
                 audio_html = get_audio_html(audio_buffer)
-                st.components.v1.html(audio_html, height=200)  # Set height to control the player size
+                st.components.v1.html(audio_html, height=0)  # Set height to 0 to hide the player
 
         else:
             st.warning("Please enter a question.")
