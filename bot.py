@@ -19,7 +19,7 @@ import io
 from gtts import gTTS
 
 #load_dotenv()
-client = OpenAI(api_key=st.secrets['OPENAI_API_KEY'])
+# client = OpenAI(api_key=st.secrets['OPENAI_API_KEY'])
 
 # Define TiDB connection URL
 tidb_connection_url = URL(
