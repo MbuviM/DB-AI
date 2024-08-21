@@ -94,6 +94,7 @@ def speak_response(response_text, voice="echo", format="mp3"):
             audio.export(wav_buffer, format="wav")
             wav_buffer.seek(0)  # Rewind the buffer to the beginning
             
+            print("Audio generated successfully.")
             return wav_buffer  # Return the in-memory WAV buffer
     
     except openai.OpenAIError as e:
