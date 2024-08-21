@@ -3,14 +3,6 @@ from bot import prepare_data, query_engine, speak_response
 import base64
 import io
 
-# Add custom CSS to hide the GitHub icon
-hide_github_icon = """
-#GithubIcon {
-  visibility: hidden;
-}
-"""
-st.markdown(hide_github_icon, unsafe_allow_html=True)
-
 def get_audio_html(audio_buffer):
     """Generate HTML for playing audio with autoplay"""
     audio_base64 = base64.b64encode(audio_buffer.read()).decode("utf-8")
