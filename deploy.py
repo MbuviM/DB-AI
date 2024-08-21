@@ -3,18 +3,19 @@ from bot import prepare_data, query_engine, speak_response
 import base64
 import io
 
-st.markdown(
-    """
-    <style>
-    .css-1jc7ptx, .e1ewe7hr3, .viewerBadge_container__1QSob,
-    .styles_viewerBadge__1yB5_, .viewerBadge_link__1S137,
-    .viewerBadge_text__1JaDK {
-        display: none;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+def hide_github_icon():
+    st.markdown(
+        """
+        <style>
+        .css-1jc7ptx, .e1ewe7hr3, .viewerBadge_container__1QSob,
+        .styles_viewerBadge__1yB5_, .viewerBadge_link__1S137,
+        .viewerBadge_text__1JaDK {
+            display: none;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
 
 def get_audio_html(audio_buffer):
     """Generate HTML for playing audio with autoplay"""
@@ -28,6 +29,7 @@ def get_audio_html(audio_buffer):
     return audio_html
 
 def main():
+    hide_github_icon()
     # Prepare data before starting the chat
     prepare_data()
 
