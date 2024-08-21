@@ -31,7 +31,7 @@ def main():
             audio_path = speak_response(str(response))
 
             # Play the audio in Streamlit
-            if os.path.exists(audio_path):
+            if audio_path and os.path.exists(audio_path):
                 with open(audio_path, "rb") as audio_file:
                     st.audio(audio_file.read(), format="audio/wav")  # Specify the correct format based on your audio
 
@@ -40,5 +40,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
