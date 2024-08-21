@@ -86,16 +86,14 @@ def speak_response(response_text, voice="echo", format="mp3"):
             input=response_text
         )
         
-        # Use BytesIO to handle the MP3 data in memory
         with BytesIO(response.content) as temp_mp3:
-            # Convert MP3 to WAV using pydub and BytesIO
             audio = AudioSegment.from_mp3(temp_mp3)
             wav_buffer = BytesIO()
             audio.export(wav_buffer, format="wav")
-            wav_buffer.seek(0)  # Rewind the buffer to the beginning
+            wav_buffer.seek(0)
             
             print("Audio generated successfully.")
-            return wav_buffer  # Return the in-memory WAV buffer
+            return wav_buffer
     
     except openai.OpenAIError as e:
         print(f"Error generating speech: {e}")
@@ -104,7 +102,6 @@ def speak_response(response_text, voice="echo", format="mp3"):
         print(f"An error occurred during speech generation: {e}")
         return None
     
-
 def chat_with_voice():
     prepare_data()
   
