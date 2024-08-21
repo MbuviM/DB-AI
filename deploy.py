@@ -1,18 +1,6 @@
 import streamlit as st
-from bot import prepare_data, query_engine, speak_response
-from io import BytesIO
-import base64
-
-def get_audio_html(audio_buffer):
-    """Generate HTML for playing audio with autoplay"""
-    audio_base64 = base64.b64encode(audio_buffer.read()).decode("utf-8")
-    audio_html = f"""
-    <audio controls autoplay>
-        <source src="data:audio/wav;base64,{audio_base64}" type="audio/wav">
-        Your browser does not support the audio element.
-    </audio>
-    """
-    return audio_html
+from bot import prepare_data, query_engine, speak_response_gtts
+import io
 
 def main():
     # Prepare data before starting the chat
@@ -32,20 +20,25 @@ def main():
 
     if st.button("Submit"):
         if user_input:
+            # Generate a response using the query engine from bot.py
             with st.spinner("Thinking..."):
                 response = query_engine.query(user_input)
             
+            # Display the response
             st.markdown(response)
 
-            wav_buffer = speak_response(str(response))
-            
-            if wav_buffer:
-                st.audio(wav_buffer, format="audio/wav")
+            # Generate audio response
+            audio_buffer = speak_response_gtts(str(response))
+
+            # Play the audio in Streamlit automatically
+            if audio_buffer:
+                st.audio(audio_buffer, format="audio/mp3")  # Ensure the correct format
 
         else:
             st.warning("Please enter a question.")
 
 if __name__ == "__main__":
     main()
+
 
 
