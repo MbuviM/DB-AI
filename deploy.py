@@ -1,5 +1,5 @@
 import streamlit as st
-from bot import prepare_data, query_engine, speak_response_gtts
+from bot import prepare_data, query_engine, speak_response
 import io
 
 def main():
