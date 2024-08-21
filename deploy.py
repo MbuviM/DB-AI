@@ -3,6 +3,19 @@ from bot import prepare_data, query_engine, speak_response
 import base64
 import io
 
+st.markdown(
+    """
+    <style>
+    .css-1jc7ptx, .e1ewe7hr3, .viewerBadge_container__1QSob,
+    .styles_viewerBadge__1yB5_, .viewerBadge_link__1S137,
+    .viewerBadge_text__1JaDK {
+        display: none;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 def get_audio_html(audio_buffer):
     """Generate HTML for playing audio with autoplay"""
     audio_base64 = base64.b64encode(audio_buffer.read()).decode("utf-8")
