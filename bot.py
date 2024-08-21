@@ -5,7 +5,6 @@ from sqlalchemy import URL
 from openai import OpenAI
 import openai
 import scipy.io.wavfile as wavfile
-import sounddevice as sd
 import numpy as np
 from pydub import AudioSegment
 from pydub.playback import play
@@ -14,7 +13,6 @@ from llama_index.vector_stores.tidbvector import TiDBVectorStore
 import time
 from contextlib import contextmanager
 from dotenv import load_dotenv
-import simpleaudio as sa
 
 load_dotenv()
 client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
@@ -78,8 +76,8 @@ def temporary_file(filename):
         if os.path.exists(filename):
             os.remove(filename)
 
-# Convert Text to Speech using OpenAI TTS
 def speak_response(response_text, voice="echo", format="mp3"):
+    audio_path = "response.wav"  # Path to save the final audio file
     try:
         response = client.audio.speech.create(
             model="tts-1",
@@ -95,21 +93,20 @@ def speak_response(response_text, voice="echo", format="mp3"):
             try:
                 # Convert MP3 to WAV
                 audio = AudioSegment.from_mp3(temp_mp3)
-                audio.export("response.wav", format="wav")
+                audio.export(audio_path, format="wav")
                 
-                # Play the WAV file using sounddevice
-                wave_obj = sd.WaveObject.from_wave_file("response.wav")
-                play_obj = wave_obj.play()
-                play_obj.wait_done()
-                # Remove the temporary WAV file
-                os.remove("response.wav")
+                return audio_path  # Return the path to the audio file
+                
             except Exception as e:
-                print(f"Error playing audio: {e}")
+                print(f"Error converting audio: {e}")
+                return None
     
     except openai.OpenAIError as e:
         print(f"Error generating speech: {e}")
+        return None
     except Exception as e:
         print(f"An error occurred during speech generation: {e}")
+        return None
 
 def chat_with_voice():
     prepare_data()
