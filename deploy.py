@@ -30,10 +30,6 @@ def main():
             # Generate audio response
             speak_response(str(response))
 
-             # Play the generated audio file (assuming it's saved as "response.wav")
-            if os.path.exists("response.wav"):
-                st.audio("response.wav")
-
         else:
             st.warning("Please enter a question.")
 
