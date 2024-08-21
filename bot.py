@@ -14,16 +14,17 @@ import time
 from contextlib import contextmanager
 from dotenv import load_dotenv
 from io import BytesIO
+import streamlit as st
 
 load_dotenv()
-client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+client = OpenAI(api_key=st.secrets['OPENAI_API_KEY'])
 
 # Define TiDB connection URL
 tidb_connection_url = URL(
     "mysql+pymysql",
-    username=os.environ['TIDB_USERNAME'],
-    password=os.environ['TIDB_PASSWORD'],
-    host=os.environ['TIDB_HOST'],
+    username=st.secrets['TIDB_USERNAME'],
+    password=st.secrets['TIDB_PASSWORD'],
+    host=st.secrets['TIDB_HOST'],
     port=4000,
     database="DATA",
     query={"ssl_verify_cert": True, "ssl_verify_identity": True},
