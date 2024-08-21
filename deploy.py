@@ -24,7 +24,7 @@ def main():
         layout="centered",
     )
 
-    st.title("Diabetes AI Chatbot")
+    st.title("Diabetes AI Chatbot :bot.jpeg:")
     st.write("Ask questions related to diabetes and get clarification.")
 
     # User input area
