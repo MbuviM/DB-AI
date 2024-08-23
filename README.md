@@ -89,6 +89,11 @@ This project is deployed on [Streamlit Cloud](https://streamlit.io/cloud). To de
 
    Follow the [Streamlit Cloud deployment guide](https://docs.streamlit.io/streamlit-cloud) to connect your GitHub repository and deploy the app.
 
+## Data Sources
+I obtained the data I used from websites such as:
+* https://uihc.org/health-topics/diabetes-frequently-asked-questions
+* https://diabetesaction.org/faq-diabetes-and-blood-sugar 
+
 ## Contributing
 
 Contributions are welcome! Please submit a pull request or open an issue if you have suggestions or improvements.
